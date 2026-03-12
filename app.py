@@ -1,11 +1,13 @@
 """
 Customer Support Query Bot — Streamlit App
-Deploy on Streamlit Community Cloud with Databricks backend.
+Deploy as a Databricks App — uses workspace OAuth automatically.
 """
+
+import os
 
 import streamlit as st
 from databricks import sql as databricks_sql
-import pandas as pd
+from databricks.sdk import WorkspaceClient
 
 # ──────────────────────────────────────────────────────────────────────
 # Page config
@@ -18,20 +20,24 @@ st.set_page_config(
 )
 
 # ──────────────────────────────────────────────────────────────────────
-# Databricks connection (reads credentials from Streamlit secrets)
+# Databricks connection
+# Uses workspace OAuth when running as a Databricks App.
+# Falls back to env vars for local development.
 # ──────────────────────────────────────────────────────────────────────
 
 @st.cache_resource
 def get_connection():
-    """
-    Connect to Databricks SQL warehouse.
-    Reads credentials from .streamlit/secrets.toml (local)
-    or Streamlit Community Cloud secrets (deployed).
-    """
+    server_hostname = os.getenv("DATABRICKS_SERVER_HOSTNAME", "avant-global-svc-use2-common.cloud.databricks.com")
+    http_path = os.getenv("DATABRICKS_HTTP_PATH", "/sql/1.0/warehouses/ca4d400fc8ce3eea")
+
+    # When running as a Databricks App, SDK picks up workspace credentials automatically
+    w = WorkspaceClient()
+    token = w.config.token
+
     return databricks_sql.connect(
-        server_hostname=st.secrets["databricks"]["server_hostname"],
-        http_path=st.secrets["databricks"]["http_path"],
-        access_token=st.secrets["databricks"]["access_token"],
+        server_hostname=server_hostname,
+        http_path=http_path,
+        access_token=token,
     )
 
 
