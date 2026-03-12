@@ -1,0 +1,16 @@
+# Databricks App configuration
+# Deploy via: Workspace → Apps → Create App → Upload this directory
+command:
+  - "streamlit"
+  - "run"
+  - "app.py"
+  - "--server.port"
+  - "8501"
+  - "--server.headless"
+  - "true"
+
+env:
+  - name: DATABRICKS_SERVER_HOSTNAME
+    value: "avant-global-svc-use2-common.cloud.databricks.com"
+  - name: DATABRICKS_HTTP_PATH
+    value: "/sql/1.0/warehouses/ca4d400fc8ce3eea"
